@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Paper Generator</title>
+    <link id="fontLink" href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'Utasha';
+            src: url('Utasha.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Kalam', sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .input-section {
+            margin-bottom: 20px;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+        textarea {
+            height: 150px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .delete-image-btn {
+            background-color: #ff4444;
+            color: white;
+            padding: 5px 10px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .delete-image-btn:hover {
+            background-color: #cc0000;
+        }
+        #preview {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .question-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .question-col {
+            width: 48%;
+        }
+        .question {
+            font-weight: bold;
+            text-align: justify;
+        }
+        .statement {
+            margin-left: 10px;
+            text-align: justify;
+        }
+        .list-table {
+            width: 100%;
+            margin: 5px 0;
+            border-collapse: collapse;
+            break-inside: auto;
+        }
+        .list-table tr {
+            break-inside: auto;
+            orphans: 2;
+            widows: 2;
+        }
+        .list-table td {
+            width: 50%;
+            padding: 3px;
+            vertical-align: top;
+            text-align: justify;
+            border: 1px solid #ddd;
+        }
+        .list-table .list-pair td {
+            padding: 1px 3px;
+        }
+        .codes-label {
+            font-weight: bold;
+            margin-top: 5px;
+            margin-bottom: 0;
+            text-align: justify;
+        }
+        .options-table {
+            width: 100%;
+            margin-top: 0;
+        }
+        .options-pair {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        .option-col {
+            width: 48%;
+        }
+        .option-label {
+            font-weight: bold;
+        }
+        .question-image {
+            max-width: 150px;
+            margin: 3px 0;
+            display: block;
+        }
+        .option-image {
+            max-width: 100px;
+            margin: 3px 0;
+            display: block;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
+        #image-section, #table-section, #set-section {
+            margin-top: 20px;
+            display: none;
+        }
+        #image-section select, #image-section input, #table-section select, #table-section input, #set-section select {
+            margin: 10px 0;
+        }
+        #height-measure {
+            position: absolute;
+            visibility: hidden;
+            width: 768px;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+        #symbolPicker {
+            margin-bottom: 10px;
+        }
+        #symbolPicker button {
+            margin: 2px;
+            padding: 5px;
+            font-size: 16px;
+        }
+        #fractionPopup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        #fractionPopup input {
+            margin: 5px 0;
+            width: 60px;
+        }
+        #fractionPopup button {
+            padding: 5px 10px;
+        }
+        .custom-table {
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .custom-table td {
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Question Paper Generator</h1>
+        <div class="input-section">
+            <h3>Upload Word Files or Paste Questions</h3>
+            <p>Math symbols aur special characters ko add karne ke liye neeche ke buttons use karo:</p>
+            <div id="symbolPicker">
+                <button onclick="insertSymbol('²')">²</button>
+                <button onclick="insertSymbol('³')">³</button>
+                <button onclick="insertSymbol('√')">√</button>
+                <button onclick="insertSymbol('π')">π</button>
+                <button onclick="insertSymbol('∑')">∑</button>
+                <button onclick="insertSymbol('∫')">∫</button>
+                <button onclick="insertSymbol('±')">±</button>
+                <button onclick="insertSymbol('×')">×</button>
+                <button onclick="insertSymbol('÷')">÷</button>
+                <button onclick="insertSymbol('≠')">≠</button>
+                <button onclick="insertSymbol('∞')">∞</button>
+                <button onclick="insertSymbol('½')">½</button>
+                <button onclick="insertSymbol('⅓')">⅓</button>
+                <button onclick="insertSymbol('¼')">¼</button>
+                <button onclick="insertSymbol('¾')">¾</button>
+                <button onclick="showFractionPopup()">Custom Fraction</button>
+                <button onclick="insertSymbol('α')">α</button>
+                <button onclick="insertSymbol('β')">β</button>
+                <button onclick="insertSymbol('θ')">θ</button>
+                <button onclick="insertSymbol('$')">$</button>
+                <button onclick="insertSymbol('€')">€</button>
+                <button onclick="insertSymbol('₹')">₹</button>
+                <button onclick="insertSymbol('£')">£</button>
+                <button onclick="insertSymbol('→')">→</button>
+                <button onclick="insertSymbol('←')">←</button>
+                <button onclick="insertSymbol('↑')">↑</button>
+                <button onclick="insertSymbol('↓')">↓</button>
+                <button onclick="insertSymbol('©')">©</button>
+                <button onclick="insertSymbol('®')">®</button>
+                <button onclick="insertSymbol('™')">™</button>
+                <button onclick="insertSymbol('§')">§</button>
+                <button onclick="insertSymbol('¶')">¶</button>
+                <button onclick="insertSymbol('°')">°</button>
+            </div>
+            <label>English Questions (.docx):</label>
+            <input type="file" id="englishFile" accept=".docx"><br><br>
+            <label>Hindi Questions (.docx):</label>
+            <input type="file" id="hindiFile" accept=".docx"><br><br>
+            <label>Extra Questions (.docx) (Optional):</label>
+            <input type="file" id="extraFile" accept=".docx"><br><br>
+            <label>Select Font:</label>
+            <select id="fontSelect" onchange="updateFont()">
+                <option value="Kalam" selected>Kalam</option>
+                <option value="Utasha">Utasha</option>
+                <option value="Mangal">Mangal</option>
+            </select><br><br>
+            <label>Font Size:</label>
+            <select id="fontSize">
+                <option value="10">10</option>
+                <option value="12" selected>12</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+                <option value="18">18</option>
+            </select><br><br>
+            <label>Select Background Color:</label>
+            <select id="backgroundColor">
+                <option value="transparent">None</option>
+                <option value="#FFFFE0">Light Yellow</option>
+                <option value="#D3D3D3">Light Gray</option>
+                <option value="#FFFDD0">Light Cream</option>
+            </select><br><br>
+            <label>English Questions (Text) - Supports special characters:</label>
+            <textarea id="englishText" placeholder="Paste English questions here..."></textarea>
+            <label>Hindi Questions (Text) - Supports special characters:</label>
+            <textarea id="hindiText" placeholder="Paste Hindi questions here..."></textarea>
+            <label>Extra Questions (Text) (Optional) - Supports special characters:</label>
+            <textarea id="extraText" placeholder="Paste extra questions here (Hindi or English)..."></textarea>
+            <button id="generateButton">Generate Questions</button>
+        </div>
+        <div id="image-section">
+            <h3>Add Images to Questions</h3>
+            <label>Select Question Number:</label>
+            <select id="questionSelect"></select><br>
+            <label>Upload Question Image (Optional):</label>
+            <input type="file" id="questionImageUpload" accept="image/*"><br>
+            <label>Upload Image for Option a:</label>
+            <input type="file" id="optionAImageUpload" accept="image/*"><br>
+            <label>Upload Image for Option b:</label>
+            <input type="file" id="optionBImageUpload" accept="image/*"><br>
+            <label>Upload Image for Option c:</label>
+            <input type="file" id="optionCImageUpload" accept="image/*"><br>
+            <label>Upload Image for Option d:</label>
+            <input type="file" id="optionDImageUpload" accept="image/*"><br>
+            <button onclick="addImages()">Add Images</button>
+        </div>
+        <div id="table-section">
+            <h3>Add Table to Question</h3>
+            <label>Select Question Number:</label>
+            <select id="tableQuestionSelect"></select><br>
+            <label>Rows:</label>
+            <input type="number" id="tableRows" min="1" value="2"><br>
+            <label>Columns:</label>
+            <input type="number" id="tableColumns" min="1" value="2"><br>
+            <div id="tableContent"></div>
+            <button onclick="addTable()">Add Table</button>
+        </div>
+        <div id="set-section">
+            <h3>Generate Paper Sets</h3>
+            <button onclick="generateSets()">Generate Sets (A, B, C, D, E)</button>
+            <div id="setPreview"></div>
+        </div>
+        <div id="edit-section">
+            <h3>Edit Individual Question</h3>
+            <label>Select Question Number:</label>
+            <select id="editQuestionSelect" onchange="loadQuestionForEdit()"></select><br>
+            <label>English Question:</label>
+            <textarea id="editEnglishText" placeholder="Edit English question here..."></textarea>
+            <label>Hindi Question:</label>
+            <textarea id="editHindiText" placeholder="Edit Hindi question here..."></textarea>
+            <button onclick="editQuestion()">Update Question</button>
+        </div>
+        <div id="error"></div>
+        <div id="preview"></div>
+        <div id="height-measure"></div>
+        <div id="fractionPopup">
+            <h3>Custom Fraction</h3>
+            <input type="number" id="fractionNumerator" placeholder="Numerator" min="0">
+            <span>/</span>
+            <input type="number" id="fractionDenominator" placeholder="Denominator" min="1">
+            <button onclick="insertCustomFraction()">Insert</button>
+            <button onclick="hideFractionPopup()">Cancel</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.17/mammoth.browser.min.js" onload="onMammothLoaded()" onerror="onMammothLoadError()"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" onload="onFileSaverLoaded()" onerror="onFileSaverLoadError()"></script>
+
+    <script>
+        let questions = { english: [], hindi: [], extra: [] };
+        let images = {};
+        let tables = {};
+        let leftExtraCount = 0;
+        let rightExtraCount = 0;
+        const errorDiv = document.getElementById('error');
+        const imageSection = document.getElementById('image-section');
+        const tableSection = document.getElementById('table-section');
+        const setSection = document.getElementById('set-section');
+        const editSection = document.getElementById('edit-section');
+        const questionSelect = document.getElementById('questionSelect');
+        const tableQuestionSelect = document.getElementById('tableQuestionSelect');
+        const editQuestionSelect = document.getElementById('editQuestionSelect');
+        const preview = document.getElementById('preview');
+        const heightMeasure = document.getElementById('height-measure');
+        const fontSelect = document.getElementById('fontSelect');
+        let mammothLoaded = false;
+        let fileSaverLoaded = false;
+        let currentTextarea = null;
+
+        const textareas = [
+            document.getElementById('englishText'),
+            document.getElementById('hindiText'),
+            document.getElementById('extraText'),
+            document.getElementById('editEnglishText'),
+            document.getElementById('editHindiText')
+        ];
+
+        textareas.forEach(textarea => {
+            textarea.addEventListener('focus', () => {
+                currentTextarea = textarea;
+            });
+        });
+
+        function onMammothLoaded() {
+            mammothLoaded = true;
+            console.log('mammoth.js loaded successfully');
+        }
+
+        function onMammothLoadError() {
+            mammothLoaded = false;
+            errorDiv.textContent = 'Error: Failed to load mammoth.js library. File uploads may not work. Use text input instead.';
+            console.error('Failed to load mammoth.js');
+        }
+
+        function onFileSaverLoaded() {
+            fileSaverLoaded = true;
+            console.log('FileSaver.js loaded successfully');
+        }
+
+        function onFileSaverLoadError() {
+            fileSaverLoaded = false;
+            errorDiv.textContent = 'Error: Failed to load FileSaver.js library. File downloads may not work.';
+            console.error('Failed to load FileSaver.js');
+        }
+
+        function updateFont() {
+            const selectedFont = fontSelect.value;
+            const fontLink = document.getElementById('fontLink');
+            
+            if (selectedFont === 'Kalam') {
+                fontLink.href = 'https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap';
+            } else if (selectedFont === 'Mangal') {
+                fontLink.href = 'https://fonts.googleapis.com/css2?family=Mangal:wght@400;700&display=swap';
+            } else {
+                fontLink.href = '';
+            }
+
+            document.body.style.fontFamily = `'${selectedFont}', sans-serif';
+            renderPreview();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded and parsed');
+            const generateButton = document.getElementById('generateButton');
+            if (generateButton) {
+                console.log('Generate button found in DOM');
+                generateButton.addEventListener('click', function() {
+                    console.log('Generate Questions button clicked');
+                    generateOutput();
+                });
+            } else {
+                console.error('Generate button not found in DOM');
+                errorDiv.textContent = 'Error: Generate button not found. Please check the HTML.';
+            }
+        });
+
+        function parseQuestions(text) {
+            console.log('Parsing questions...');
+            console.log('Input text:', text);
+            if (!text || typeof text !== 'string') {
+                console.error('Invalid input text for parsing');
+                throw new Error('Invalid input text for parsing');
+            }
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            console.log('Lines:', lines);
+            const parsed = [];
+            let currentQuestion = null;
+            let isParsingQuestionBody = false;
+            let isParsingLists = false;
+            let listHeaders = [];
+            let listPairs = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                console.log(`Line ${i + 1}: "${line}"`);
+
+                if (line.startsWith('!!')) {
+                    if (currentQuestion) {
+                        if (isParsingLists) {
+                            currentQuestion.lists = { headers: listHeaders, pairs: listPairs };
+                            isParsingLists = false;
+                            listHeaders = [];
+                            listPairs = [];
+                        }
+                        parsed.push(currentQuestion);
+                    }
+                    const questionNumberMatch = line.match(/^!!(\d+)!/);
+                    const questionNumber = questionNumberMatch ? questionNumberMatch[1] : '';
+                    const questionText = line.replace(/^!!\d+!/, '').trim();
+                    currentQuestion = { 
+                        questionNumber, 
+                        question: questionText, 
+                        statements: [], 
+                        lists: null, 
+                        options: [], 
+                        hasCodes: false 
+                    };
+                    isParsingQuestionBody = true;
+                    console.log('New question started:', currentQuestion);
+                } else if (line.match(/^(List|सूची)\s?-?\s?[I|II|1]/) && currentQuestion) {
+                    console.log('Detected list header:', line);
+                    isParsingQuestionBody = false;
+                    isParsingLists = true;
+                    let modifiedLine = line;
+                    if (modifiedLine.match(/^List-I\s*--\s*List-II/)) modifiedLine = 'List I -- List II';
+                    else if (modifiedLine.match(/^सूची-I\s*--\s*सूची-II/)) modifiedLine = 'सूची I -- सूची II';
+                    listHeaders = modifiedLine.split(/\s*--\s*/).map(header => header.trim());
+                    console.log('List headers:', listHeaders);
+                } else if (isParsingLists && line.match(/^\([A-D]\.\)/) && currentQuestion) {
+                    listPairs.push(line);
+                    console.log('Added list pair:', line);
+                } else if (line.match(/^(Codes|कूट):/) && currentQuestion) {
+                    console.log('Detected Codes label:', line);
+                    isParsingQuestionBody = false;
+                    currentQuestion.hasCodes = true;
+                } else if (line.startsWith('!') && currentQuestion) {
+                    console.log('Detected option:', line);
+                    isParsingQuestionBody = false;
+                    currentQuestion.options.push(line.replace(/^!/, '').trim());
+                    console.log('Added option:', currentQuestion.options[currentQuestion.options.length - 1]);
+                } else if (currentQuestion && isParsingQuestionBody) {
+                    currentQuestion.statements.push(line);
+                    console.log('Added statement:', line);
+                } else {
+                    console.warn('Unrecognized line format, skipping:', line);
+                }
+            }
+
+            if (currentQuestion) {
+                if (isParsingLists) {
+                    currentQuestion.lists = { headers: listHeaders, pairs: listPairs };
+                }
+                parsed.push(currentQuestion);
+            }
+            console.log('Parsed questions:', parsed);
+            return parsed;
+        }
+
+        async function readFile(file) {
+            console.log('Reading file:', file.name);
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        if (!mammothLoaded) {
+                            throw new Error('mammoth.js not loaded');
+                        }
+                        const result = await mammoth.extractRawText({ arrayBuffer });
+                        console.log('File content:', result.value);
+                        resolve(result.value);
+                    } catch (err) {
+                        console.error('Error reading file:', err);
+                        reject(err);
+                    }
+                };
+                reader.onerror = () => {
+                    console.error('File reading failed');
+                    reject(new Error('File reading failed'));
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        async function generateOutput() {
+            console.log('Starting generateOutput...');
+            errorDiv.textContent = '';
+            questions = { english: [], hindi: [], extra: [] };
+            images = {};
+            tables = {};
+
+            try {
+                const englishFile = document.getElementById('englishFile').files[0];
+                const hindiFile = document.getElementById('hindiFile').files[0];
+                const extraFile = document.getElementById('extraFile').files[0];
+                let englishText = document.getElementById('englishText').value;
+                let hindiText = document.getElementById('hindiText').value;
+                let extraText = document.getElementById('extraText').value;
+                console.log('Inputs:', { englishFile: !!englishFile, hindiFile: !!hindiFile, extraFile: !!extraFile, englishText, hindiText, extraText });
+
+                englishText = englishText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                hindiText = hindiText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+                extraText = extraText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+                if (englishFile) {
+                    console.log('Processing English file...');
+                    const text = await readFile(englishFile);
+                    questions.english = parseQuestions(text);
+                } else if (englishText.trim()) {
+                    console.log('Processing English text...');
+                    questions.english = parseQuestions(englishText);
+                } else {
+                    console.log('No English input provided');
+                    throw new Error('Please provide English questions (either via file or text).');
+                }
+
+                if (hindiFile) {
+                    console.log('Processing Hindi file...');
+                    const text = await readFile(hindiFile);
+                    questions.hindi = parseQuestions(text);
+                } else if (hindiText.trim()) {
+                    console.log('Processing Hindi text...');
+                    questions.hindi = parseQuestions(hindiText);
+                } else {
+                    console.log('No Hindi input provided');
+                    throw new Error('Please provide Hindi questions (either via file or text).');
+                }
+
+                if (extraFile) {
+                    console.log('Processing Extra file...');
+                    const text = await readFile(extraFile);
+                    questions.extra = parseQuestions(text);
+                } else if (extraText.trim()) {
+                    console.log('Processing Extra text...');
+                    questions.extra = parseQuestions(extraText);
+                }
+
+                console.log('Parsed questions:', questions);
+                if (questions.english.length === 0 || questions.hindi.length === 0) {
+                    errorDiv.textContent = 'Error: No valid questions parsed for English or Hindi. Please check your input format.';
+                    console.error('No questions parsed for English or Hindi');
+                    return;
+                }
+
+                if (questions.english.length > 150 || questions.hindi.length > 150) {
+                    errorDiv.textContent = 'Warning: Over 150 questions detected in English or Hindi. Only the first 150 will be processed.';
+                    questions.english = questions.english.slice(0, 150);
+                    questions.hindi = questions.hindi.slice(0, 150);
+                    console.log('Limited English/Hindi questions to 150:', questions);
+                }
+
+                if (questions.extra.length > 150) {
+                    errorDiv.textContent = 'Warning: Over 150 extra questions detected. Only the first 150 will be processed.';
+                    questions.extra = questions.extra.slice(0, 150);
+                    console.log('Limited extra questions to 150:', questions.extra);
+                }
+
+                const pairedCount = Math.min(questions.english.length, questions.hindi.length);
+                const extraCount = questions.extra.length;
+                leftExtraCount = Math.ceil(extraCount / 2);
+                rightExtraCount = extraCount - leftExtraCount;
+                console.log(`Splitting extra questions: ${leftExtraCount} left, ${rightExtraCount} right`);
+
+                if (extraCount > 0) {
+                    const leftExtras = questions.extra.slice(0, leftExtraCount);
+                    const rightExtras = questions.extra.slice(leftExtraCount, extraCount);
+
+                    for (let i = 0; i < Math.max(leftExtraCount, rightExtraCount); i++) {
+                        if (i < leftExtraCount) {
+                            questions.english.push(leftExtras[i]);
+                        } else {
+                            questions.english.push({ question: '', statements: [], options: [], lists: null, hasCodes: false });
+                        }
+
+                        if (i < rightExtraCount) {
+                            questions.hindi.push(rightExtras[i]);
+                        } else {
+                            questions.hindi.push({ question: '', statements: [], options: [], lists: null, hasCodes: false });
+                        }
+                    }
+                }
+
+                console.log('Updated questions after adding extras:', questions);
+
+                questionSelect.innerHTML = '';
+                tableQuestionSelect.innerHTML = '';
+                editQuestionSelect.innerHTML = '';
+                const maxQuestions = Math.min(questions.english.length, questions.hindi.length);
+                for (let i = 1; i <= maxQuestions; i++) {
+                    const option = document.createElement('option');
+                    option.value = i - 1;
+                    option.textContent = `Question ${i}`;
+                    questionSelect.appendChild(option.cloneNode(true));
+                    tableQuestionSelect.appendChild(option.cloneNode(true));
+                    editQuestionSelect.appendChild(option.cloneNode(true));
+                }
+
+                renderPreview();
+                imageSection.style.display = 'block';
+                tableSection.style.display = 'block';
+                setSection.style.display = 'block';
+                editSection.style.display = 'block';
+                errorDiv.textContent = 'Questions generated successfully!';
+            } catch (err) {
+                errorDiv.textContent = 'Error processing input: ' + err.message;
+                console.error('Error in generateOutput:', err);
+            }
+        }
+
+        function insertSymbol(symbol) {
+            if (currentTextarea) {
+                const start = currentTextarea.selectionStart;
+                const end = currentTextarea.selectionEnd;
+                const text = currentTextarea.value;
+                const before = text.substring(0, start);
+                const after = text.substring(end, text.length);
+                currentTextarea.value = before + symbol + after;
+                currentTextarea.selectionStart = start + symbol.length;
+                currentTextarea.selectionEnd = start + symbol.length;
+                currentTextarea.focus();
+            } else {
+                console.log('No textarea is focused');
+            }
+        }
+
+        function showFractionPopup() {
+            document.getElementById('fractionPopup').style.display = 'block';
+        }
+
+        function hideFractionPopup() {
+            document.getElementById('fractionPopup').style.display = 'none';
+            document.getElementById('fractionNumerator').value = '';
+            document.getElementById('fractionDenominator').value = '';
+        }
+
+        function insertCustomFraction() {
+            const numerator = document.getElementById('fractionNumerator').value;
+            const denominator = document.getElementById('fractionDenominator').value;
+
+            if (currentTextarea && numerator && denominator) {
+                const fraction = `${numerator}/${denominator}`;
+                const start = currentTextarea.selectionStart;
+                const end = currentTextarea.selectionEnd;
+                const text = currentTextarea.value;
+                const before = text.substring(0, start);
+                const after = text.substring(end, text.length);
+                currentTextarea.value = before + fraction + after;
+                currentTextarea.selectionStart = start + fraction.length;
+                currentTextarea.selectionEnd = start + fraction.length;
+                currentTextarea.focus();
+            } else {
+                errorDiv.textContent = 'Please enter both numerator and denominator for the fraction.';
+            }
+            hideFractionPopup();
+        }
+
+        function loadQuestionForEdit() {
+            const questionIndex = parseInt(editQuestionSelect.value);
+            if (questionIndex >= 0 && questionIndex < questions.english.length) {
+                const qEnglish = questions.english[questionIndex];
+                const qHindi = questions.hindi[questionIndex];
+                document.getElementById('editEnglishText').value = formatQuestionForEdit(qEnglish);
+                document.getElementById('editHindiText').value = formatQuestionForEdit(qHindi);
+            }
+        }
+
+        function formatQuestionForEdit(q) {
+            let text = `!!${q.questionNumber || ''}! ${q.question}\n`;
+            if (q.statements && q.statements.length > 0) {
+                text += q.statements.join('\n') + '\n';
+            }
+            if (q.lists) {
+                text += `${q.lists.headers.join(' -- ')}\n`;
+                text += q.lists.pairs.join('\n') + '\n';
+            }
+            if (q.hasCodes) {
+                text += 'Codes:\n';
+            }
+            if (q.options && q.options.length > 0) {
+                text += q.options.map(opt => `! ${opt}`).join('\n') + '\n';
+            }
+            return text.trim();
+        }
+
+        function addImages() {
+            const questionIndex = parseInt(questionSelect.value);
+            const questionImageFile = document.getElementById('questionImageUpload').files[0];
+            const optionAImageFile = document.getElementById('optionAImageUpload').files[0];
+            const optionBImageFile = document.getElementById('optionBImageUpload').files[0];
+            const optionCImageFile = document.getElementById('optionCImageUpload').files[0];
+            const optionDImageFile = document.getElementById('optionDImageUpload').files[0];
+
+            if (!images[questionIndex]) {
+                images[questionIndex] = {};
+            }
+
+            const loadImage = (file, key) => {
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        images[questionIndex][key] = e.target.result;
+                        renderPreview();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            loadImage(questionImageFile, 'questionImage');
+            loadImage(optionAImageFile, 'optionA');
+            loadImage(optionBImageFile, 'optionB');
+            loadImage(optionCImageFile, 'optionC');
+            loadImage(optionDImageFile, 'optionD');
+
+            document.getElementById('questionImageUpload').value = '';
+            document.getElementById('optionAImageUpload').value = '';
+            document.getElementById('optionBImageUpload').value = '';
+            document.getElementById('optionCImageUpload').value = '';
+            document.getElementById('optionDImageUpload').value = '';
+        }
+
+        function deleteImage(questionIndex, type) {
+            if (images[questionIndex]) {
+                delete images[questionIndex][type];
+                if (Object.keys(images[questionIndex]).length === 0) {
+                    delete images[questionIndex];
+                }
+                renderPreview();
+            }
+        }
+
+        function renderQuestionContent(q, questionIndex) {
+            let content = '';
+            if (q.question) {
+                content += `<div class="question">${q.questionNumber ? q.questionNumber + '. ' : ''}${q.question}</div>`;
+            }
+            q.statements.forEach(stmt => {
+                content += `<div class="statement">${stmt}</div>`;
+            });
+            if (images[questionIndex] && images[questionIndex].questionImage) {
+                content += `<img src="${images[questionIndex].questionImage}" class="question-image" alt="Question Image">`;
+                content += `<button class="delete-image-btn" onclick="deleteImage(${questionIndex}, 'questionImage')">Delete Image</button>`;
+            }
+            if (tables[questionIndex]) {
+                content += '<table class="custom-table">';
+                tables[questionIndex].forEach(row => {
+                    content += '<tr>';
+                    row.forEach(cell => {
+                        content += `<td>${cell}</td>`;
+                    });
+                    content += '</tr>';
+                });
+                content += '</table>';
+            }
+            if (q.lists) {
+                content += `<table class="list-table"><tr>`;
+                q.lists.headers.forEach(header => {
+                    content += `<td><b>${header}</b></td>`;
+                });
+                content += `</tr>`;
+                q.lists.pairs.forEach(pair => {
+                    const [left, right] = pair.split(/\s*--\s*/);
+                    content += `<tr class="list-pair"><td>${left || ''}</td><td>${right || ''}</td></tr>`;
+                });
+                content += `</table>`;
+            }
+            if (q.hasCodes) {
+                content += `<div class="codes-label">Codes:</div>`;
+            }
+            if (q.options.length > 0) {
+                content += `<div class="options-table">`;
+                const optionPairs = [['a', 'b'], ['c', 'd']];
+                optionPairs.forEach(pair => {
+                    content += `<div class="options-pair">`;
+                    pair.forEach((optLabel, idx) => {
+                        const optIndex = 'abcd'.indexOf(optLabel);
+                        if (optIndex < q.options.length) {
+                            content += `<div class="option-col"><span class="option-label">${optLabel}.</span> ${q.options[optIndex]}`;
+                            if (images[questionIndex] && images[questionIndex][`option${optLabel.toUpperCase()}`]) {
+                                content += `<img src="${images[questionIndex][`option${optLabel.toUpperCase()}`]}" class="option-image" alt="Option ${optLabel} Image">`;
+                                content += `<button class="delete-image-btn" onclick="deleteImage(${questionIndex}, 'option${optLabel.toUpperCase()}')">Delete Image</button>`;
+                            }
+                            content += `</div>`;
+                        }
+                    });
+                    content += `</div>`;
+                });
+                content += `</div>`;
+            }
+            return content;
+        }
+
+        function renderPreview() {
+            const fontSize = document.getElementById('fontSize').value + 'px';
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            preview.style.fontSize = fontSize;
+            preview.style.backgroundColor = backgroundColor;
+
+            let html = '';
+            const maxQuestions = Math.min(questions.english.length, questions.hindi.length);
+            for (let i = 0; i < maxQuestions; i++) {
+                const qEnglish = questions.english[i];
+                const qHindi = questions.hindi[i];
+                html += `<div class="question-row">`;
+                html += `<div class="question-col">${renderQuestionContent(qEnglish, i)}</div>`;
+                html += `<div class="question-col">${renderQuestionContent(qHindi, i)}</div>`;
+                html += `</div>`;
+            }
+            preview.innerHTML = html;
+        }
+
+        function editQuestion() {
+            const questionIndex = parseInt(editQuestionSelect.value);
+            const newEnglishText = document.getElementById('editEnglishText').value;
+            const newHindiText = document.getElementById('editHindiText').value;
+
+            if (questionIndex >= 0 && questionIndex < questions.english.length) {
+                questions.english[questionIndex] = parseQuestions(newEnglishText)[0] || { question: '', statements: [], options: [], lists: null, hasCodes: false };
+                questions.hindi[questionIndex] = parseQuestions(newHindiText)[0] || { question: '', statements: [], options: [], lists: null, hasCodes: false };
+                renderPreview();
+                errorDiv.textContent = `Question ${questionIndex + 1} updated successfully!`;
+            }
+        }
+
+        function downloadHTML() {
+            if (!fileSaverLoaded) {
+                errorDiv.textContent = 'Error: FileSaver.js not loaded. Cannot download file.';
+                return;
+            }
+            const fontSize = document.getElementById('fontSize').value + 'px';
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const fontFamily = fontSelect.value;
+
+            let fontLink = '';
+            if (fontFamily === 'Kalam') {
+                fontLink = '<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">';
+            } else if (fontFamily === 'Mangal') {
+                fontLink = '<link href="https://fonts.googleapis.com/css2?family=Mangal:wght@400;700&display=swap" rel="stylesheet">';
+            }
+
+            const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Paper</title>
+    ${fontLink}
+    <style>
+        body { font-family: '${fontFamily}', sans-serif; font-size: ${fontSize}; margin: 20px; background-color: ${backgroundColor}; }
+        .question-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .question-col { width: 48%; }
+        .question { font-weight: bold; text-align: justify; }
+        .statement { margin-left: 10px; text-align: justify; }
+        .list-table { width: 100%; margin: 5px 0; border-collapse: collapse; }
+        .list-table td { width: 50%; padding: 3px; vertical-align: top; text-align: justify; border: 1px solid #ddd; }
+        .list-table .list-pair td { padding: 1px 3px; }
+        .codes-label { font-weight: bold; margin-top: 5px; margin-bottom: 0; text-align: justify; }
+        .options-pair { display: flex; justify-content: space-between; margin-bottom: 2px; }
+        .option-col { width: 48%; }
+        .option-label { font-weight: bold; }
+        .question-image { max-width: 150px; margin: 3px 0; display: block; }
+        .option-image { max-width: 100px; margin: 3px 0; display: block; }
+        .custom-table { border-collapse: collapse; margin: 10px 0; }
+        .custom-table td { border: 1px solid #ddd; padding: 5px; }
+    </style>
+</head>
+<body>
+    ${preview.innerHTML}
+</body>
+</html>`;
+
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            saveAs(blob, 'question_paper.html');
+        }
+
+        function printPaper() {
+            const printWindow = window.open('', '_blank');
+            const fontSize = document.getElementById('fontSize').value + 'px';
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const fontFamily = fontSelect.value;
+
+            let fontLink = '';
+            if (fontFamily === 'Kalam') {
+                fontLink = '<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&display=swap" rel="stylesheet">';
+            } else if (fontFamily === 'Mangal') {
+                fontLink = '<link href="https://fonts.googleapis.com/css2?family=Mangal:wght@400;700&display=swap" rel="stylesheet">';
+            }
+
+            printWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Paper</title>
+    ${fontLink}
+    <style>
+        body { font-family: '${fontFamily}', sans-serif; font-size: ${fontSize}; margin: 20px; background-color: ${backgroundColor}; }
+        .question-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .question-col { width: 48%; }
+        .question { font-weight: bold; text-align: justify; }
+        .statement { margin-left: 10px; text-align: justify; }
+        .list-table { width: 100%; margin: 5px 0; border-collapse: collapse; }
+        .list-table td { width: 50%; padding: 3px; vertical-align: top; text-align: justify; border: 1px solid #ddd; }
+        .list-table .list-pair td { padding: 1px 3px; }
+        .codes-label { font-weight: bold; margin-top: 5px; margin-bottom: 0; text-align: justify; }
+        .options-pair { display: flex; justify-content: space-between; margin-bottom: 2px; }
+        .option-col { width: 48%; }
+        .option-label { font-weight: bold; }
+        .question-image { max-width: 150px; margin: 3px 0; display: block; }
+        .option-image { max-width: 100px; margin: 3px 0; display: block; }
+        .custom-table { border-collapse: collapse; margin: 10px 0; }
+        .custom-table td { border: 1px solid #ddd; padding: 5px; }
+        .delete-image-btn { display: none; }
+    </style>
+</head>
+<body>
+    ${preview.innerHTML}
+</body>
+</html>`);
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+        }
+
+        function addTable() {
+            const questionIndex = parseInt(tableQuestionSelect.value);
+            const rows = parseInt(document.getElementById('tableRows').value);
+            const cols = parseInt(document.getElementById('tableColumns').value);
+
+            if (!tables[questionIndex]) {
+                tables[questionIndex] = [];
+            }
+
+            const tableContentDiv = document.getElementById('tableContent');
+            tableContentDiv.innerHTML = '';
+
+            let tableData = [];
+            for (let i = 0; i < rows; i++) {
+                let row = [];
+                for (let j = 0; j < cols; j++) {
+                    row.push(`Cell ${i + 1}-${j + 1}`);
+                }
+                tableData.push(row);
+            }
+
+            const table = document.createElement('table');
+            table.className = 'custom-table';
+            for (let i = 0; i < rows; i++) {
+                const tr = document.createElement('tr');
+                for (let j = 0; j < cols; j++) {
+                    const td = document.createElement('td');
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = tableData[i][j];
+                    input.onchange = (e) => {
+                        tableData[i][j] = e.target.value;
+                        tables[questionIndex] = tableData;
+                        renderPreview();
+                    };
+                    td.appendChild(input);
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+            tableContentDiv.appendChild(table);
+            tables[questionIndex] = tableData;
+            renderPreview();
+        }
+
+        function generateSets() {
+            const maxQuestions = Math.min(questions.english.length, questions.hindi.length);
+            const sets = ['A', 'B', 'C', 'D', 'E'];
+            let setHtml = '<h2>Paper Sets</h2>';
+
+            sets.forEach(set => {
+                setHtml += `<h3>Booklet ${set}</h3><div class="question-row">`;
+                let shuffledEnglish = [...questions.english];
+                let shuffledHindi = [...questions.hindi];
+                for (let i = shuffledEnglish.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledEnglish[i], shuffledEnglish[j]] = [shuffledEnglish[j], shuffledEnglish[i]];
+                    [shuffledHindi[i], shuffledHindi[j]] = [shuffledHindi[j], shuffledHindi[i]];
+                }
+                for (let i = 0; i < maxQuestions; i++) {
+                    setHtml += `<div class="question-col">${renderQuestionContent(shuffledEnglish[i], i)}</div>`;
+                    setHtml += `<div class="question-col">${renderQuestionContent(shuffledHindi[i], i)}</div>`;
+                }
+                setHtml += `</div>`;
+            });
+
+            document.getElementById('setPreview').innerHTML = setHtml;
+        }
+    </script>
+</body>
+</html>
